@@ -1,22 +1,26 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config(); // Carga las variables de entorno
+const pool = require('./db'); // Importa la conexión a la base de datos
+require('dotenv').config();
 
 const app = express();
-
-// Usa el puerto que Render proporciona o el 4000 como fallback
 const port = process.env.PORT || 4000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Ruta básica para verificar el funcionamiento del servidor
-app.get('/', (req, res) => {
-  res.send('¡El servidor está corriendo correctamente!');
+// Ruta para obtener todos los productos
+app.get('/products', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM products');
+    res.json(rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Error al obtener productos' });
+  }
 });
 
-// Levantar el servidor
+// Iniciar el servidor
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
